@@ -1,4 +1,5 @@
-export const API_BASE = 'http://localhost:8081/api';
+// Container builds set VITE_API_BASE=/api so nginx proxies API calls to the backend service.
+export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8081/api';
 
 export const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const;
 export const STATUSES = ['OPEN', 'IN_PROGRESS', 'REMEDIATED', 'ACCEPTED_RISK'] as const;

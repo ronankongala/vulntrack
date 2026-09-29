@@ -1,0 +1,67 @@
+# Kubernetes DNS domain, used to build fully qualified Service names.
+clusterDomain: cluster.local
+
+# Images are built locally and loaded into minikube, so never pull them from a registry.
+backend:
+  image:
+    repository: vulntrack-backend
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 8081
+  # Non-secret settings, rendered into a ConfigMap.
+  config:
+    SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+  # Secret values; leave empty to generate a random value on install (kept across upgrades).
+  jwtSecret: ""
+  adminPassword: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+
+frontend:
+  image:
+    repository: vulntrack-frontend
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30080
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+# Same database and user as docker-compose.yml.
+postgres:
+  image:
+    repository: postgres
+    tag: "16"
+    pullPolicy: IfNotPresent
+  service:
+    port: 5432
+  database: vulntrack
+  username: vulntrack_user
+  password: vulntrack_pass
+  persistence:
+    size: 1Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

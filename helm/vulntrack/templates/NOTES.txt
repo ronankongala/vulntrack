@@ -1,0 +1,8 @@
+VulnTrack is deploying. Watch the pods with:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }} -w
+
+Frontend URL (minikube):
+  minikube service {{ include "vulntrack.frontend.name" . }} --url
+
+Admin login: user "admin", password:
+  kubectl get secret {{ include "vulntrack.backend.name" . }} -o jsonpath='{.data.VULNTRACK_ADMIN_PASSWORD}' | base64 -d

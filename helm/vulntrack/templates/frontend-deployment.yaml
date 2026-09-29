@@ -1,0 +1,41 @@
+{{- $sel := dict "root" . "component" "frontend" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vulntrack.frontend.name" . }}
+  labels:
+    {{- include "vulntrack.labels" . | nindent 4 }}
+    {{- include "vulntrack.selector" $sel | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vulntrack.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vulntrack.selector" $sel | nindent 8 }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          env:
+            # nginx proxies /api to this in-cluster backend Service; must be fully qualified for nginx's resolver.
+            - name: BACKEND_URL
+              value: "http://{{ include "vulntrack.backend.name" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.backend.service.port }}"
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}

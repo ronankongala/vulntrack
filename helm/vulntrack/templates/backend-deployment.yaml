@@ -1,0 +1,62 @@
+{{- $sel := dict "root" . "component" "backend" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vulntrack.backend.name" . }}
+  labels:
+    {{- include "vulntrack.labels" . | nindent 4 }}
+    {{- include "vulntrack.selector" $sel | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vulntrack.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vulntrack.selector" $sel | nindent 8 }}
+      annotations:
+        # Roll the pods when their configuration changes.
+        checksum/config: {{ include (print $.Template.BasePath "/backend-configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/backend-secret.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Flyway runs at startup, so hold the backend until postgres accepts connections.
+        - name: wait-for-postgres
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - until pg_isready -h {{ include "vulntrack.postgres.name" . }} -p {{ .Values.postgres.service.port }}; do echo waiting for postgres; sleep 2; done
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "vulntrack.backend.name" . }}
+            - secretRef:
+                name: {{ include "vulntrack.backend.name" . }}
+          # No actuator on the classpath, so probe the listening socket.
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
