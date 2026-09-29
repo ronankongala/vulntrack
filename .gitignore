@@ -1,0 +1,42 @@
+# Java / Maven
+target/
+backend/target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
+
+# Node / npm
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+.npm/
+
+# Docker and Kubernetes
+.docker/
+*.tgz
+helm/**/charts/
+kubeconfig
+.kube/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# Logs
+*.log
+backend.log
+vite.log
+backend/backend.log
+frontend/vite.log
+
+# Credentials and environment files
+.vulntrack-ci.env
+.env
+.env.*
+
+# Claude Code working files
+.claude/
