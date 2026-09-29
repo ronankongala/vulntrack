@@ -12,7 +12,7 @@
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 1 | Missing Content-Security-Policy Header | Low | Open |
+| 1 | Missing Content-Security-Policy Header | Low | Remediated |
 | 2 | Authentication Enforced on All Protected Endpoints | Informational | No action required |
 | 3 | SQL Injection Test on Filter Parameters | Informational | No vulnerability found |
 
@@ -23,7 +23,7 @@
 - **Severity:** Low
 - **Tool:** Burp Suite Community Edition v2026.8
 - **Target:** `http://172.24.220.60:8081/api/vulnerabilities`
-- **Status:** Open
+- **Status:** Remediated
 
 **Description**
 
@@ -52,6 +52,10 @@ Add a `Content-Security-Policy` header via Spring Security's `headers()` configu
 http.headers(headers -> headers
         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'")));
 ```
+
+**Verification**
+
+Applied in `SecurityConfig`. A retest with curl on September 29, 2026 confirmed `Content-Security-Policy: default-src 'none'` on API responses, including the unauthenticated 401 from `GET /api/vulnerabilities` and the 400 from `POST /api/auth/login`.
 
 ---
 
