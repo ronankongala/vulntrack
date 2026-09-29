@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: vulntrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vulntrack
+      POSTGRES_USER: vulntrack_user
+      POSTGRES_PASSWORD: vulntrack_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - vulntrack_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vulntrack_user -d vulntrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  vulntrack_pgdata:
