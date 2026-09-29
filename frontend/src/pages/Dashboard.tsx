@@ -102,7 +102,7 @@ export default function Dashboard() {
                   <td>{v.title}</td>
                   <td><SeverityBadge severity={v.severity} /></td>
                   <td>{STATUS_LABELS[v.status]}</td>
-                  <td className="num">{v.cvssScore ?? '—'}</td>
+                  <td className="num">{v.cvssScore ?? '-'}</td>
                 </tr>
               ))}
             </tbody>
