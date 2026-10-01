@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# VulnTrack Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 and TypeScript single-page app for VulnTrack, built with Vite 8 and the `@vitejs/plugin-react` plugin. It talks to the Spring Boot API in `../backend`.
 
-Currently, two official plugins are available:
+## Pages
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Route | Page | Notes |
+|---|---|---|
+| `/login` | `src/pages/Login.tsx` | Posts to `/api/auth/login` and keeps the returned JWT in React state |
+| `/` | `src/pages/Dashboard.tsx` | Findings list with severity color-coding and severity/status filters |
+| `/vulnerabilities/:id` | `src/pages/VulnerabilityDetail.tsx` | Detail view for one finding |
 
-## React Compiler
+Both `/` and `/vulnerabilities/:id` are wrapped in `RequireAuth` (`src/auth.tsx`), which redirects to `/login` when there is no token. Routing uses `react-router-dom` 7.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Configuration
 
-## Expanding the Oxlint configuration
+`src/api.ts` reads the API base URL from `VITE_API_BASE`. Without it, the app calls `http://localhost:8081/api`.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Scripts
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm ci            # install dependencies
+npm run dev       # Vite dev server
+npm run build     # type-check with tsc -b, then vite build into dist/
+npm run lint      # oxlint
+npm run preview   # serve the production build locally
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Container image
+
+The `Dockerfile` builds the bundle on `node:24-alpine` with `VITE_API_BASE=/api`, then serves `dist/` from `nginx:1.29-alpine`. `nginx.conf.template` proxies `/api/` to `BACKEND_URL` (by default `http://vulntrack-backend.default.svc.cluster.local:8081`) and falls back to `index.html` for client-side routes.

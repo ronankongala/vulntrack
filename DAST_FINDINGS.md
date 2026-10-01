@@ -27,7 +27,7 @@
 
 **Description**
 
-The API responses do not include a `Content-Security-Policy` header. While the backend is a REST API serving JSON (not HTML), adding CSP to all responses is a defense-in-depth measure that prevents potential misuse if the API is ever consumed in an unexpected browser context.
+The API responses do not include a `Content-Security-Policy` header. The backend serves JSON rather than HTML, so the direct impact is small. Adding CSP to every response is defense in depth for the case where a browser ends up rendering an API response.
 
 **Evidence**
 
@@ -81,7 +81,7 @@ All API endpoints under `/api/vulnerabilities` require a valid JWT Bearer token.
 
 **Description**
 
-Tested the filter query parameters (`?severity=' OR 1=1--&status=OPEN`) for SQL injection. The Spring Data JPA layer uses parameterized queries, so the input was treated as a literal enum value, returned an empty result set, and no SQL error or unexpected data was exposed.
+Tested the filter query parameters (`?severity=' OR 1=1--&status=OPEN`) for SQL injection. The Spring Data JPA layer uses parameterized queries, so the input was treated as a literal enum value. The request returned an empty result set with no SQL error and no unexpected data.
 
 **Evidence**
 
