@@ -14,7 +14,7 @@ pipeline {
                 sh '''
                     tar -C /workspace/vulntrack \
                         --exclude=./frontend/node_modules --exclude=./frontend/dist \
-                        --exclude=./backend/target --exclude=./.claude \
+                        --exclude=./backend/target \
                         -cf - . | tar -xf -
                 '''
             }

@@ -37,6 +37,3 @@ frontend/vite.log
 .vulntrack-ci.env
 .env
 .env.*
-
-# Claude Code working files
-.claude/
